@@ -1,0 +1,23 @@
+.env*
+node_modules/
+.DS_Store
+
+# 隐私防误推 — 任何音频文件永不入 public repo
+voice/
+*.m4a
+*.wav
+*.mp3
+*.flac
+*.ogg
+
+# whisper.cpp 输出
+*.srt
+*.vtt
+
+# editor
+.vscode/
+.idea/
+*.swp
+
+# logs
+*.log

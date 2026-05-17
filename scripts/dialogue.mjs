@@ -147,20 +147,21 @@ async function runWhisper(voicePath) {
     console.error(`
 ERROR: whisper-cli not found. Install:
   brew install whisper-cpp
-Then download a Chinese model, e.g.:
+Then download a Chinese model:
   curl -L -o ~/whisper-models/ggml-medium.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium.bin
-And export the path:
-  export WHISPER_MODEL=~/whisper-models/ggml-medium.bin
 `)
     process.exit(3)
   }
-  const model = process.env.WHISPER_MODEL
-  if (!model || !existsSync(model)) {
-    console.error('ERROR: WHISPER_MODEL env var unset or file missing. See install instructions above.')
+  // Try env var, then default location
+  const model = process.env.WHISPER_MODEL || join(homedir(), 'whisper-models', 'ggml-medium.bin')
+  if (!existsSync(model)) {
+    console.error(`ERROR: whisper model not found at ${model}`)
+    console.error(`Download:  curl -L -o ${model} https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium.bin`)
+    console.error(`Or set WHISPER_MODEL=<path> in env to point elsewhere.`)
     process.exit(3)
   }
   const out = join('/tmp', `dl-transcript-${Date.now()}`)
-  console.error(`Running whisper-cli on ${voicePath}...`)
+  console.error(`Running whisper-cli on ${voicePath} (model: ${model})...`)
   const r = spawnSync('whisper-cli', ['-m', model, '-l', 'zh', '-otxt', '-of', out, voicePath], { stdio: 'inherit' })
   if (r.status !== 0) {
     console.error('whisper-cli failed.')

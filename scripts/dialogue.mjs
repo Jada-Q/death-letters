@@ -139,6 +139,28 @@ function extractLetterBody(path, maxChars = 600) {
   return body.length > maxChars ? body.slice(0, maxChars) + '…' : body
 }
 
+// Convert any audio format to whisper-friendly wav (16kHz mono pcm_s16le).
+// Returns path to wav (either input itself if already wav, or new /tmp/.wav).
+function ensureWav(voicePath) {
+  if (voicePath.toLowerCase().endsWith('.wav')) return { path: voicePath, isTmp: false }
+  // Need ffmpeg
+  try {
+    execSync('which ffmpeg', { stdio: 'pipe' })
+  } catch {
+    console.error('ERROR: ffmpeg not found. Install: brew install ffmpeg')
+    console.error('(Or convert your audio to .wav manually and re-run.)')
+    process.exit(3)
+  }
+  const wavPath = join('/tmp', `dl-audio-${Date.now()}.wav`)
+  console.error(`Converting ${voicePath} → ${wavPath} via ffmpeg...`)
+  const r = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', voicePath, '-ar', '16000', '-ac', '1', '-c:a', 'pcm_s16le', wavPath], { stdio: 'inherit' })
+  if (r.status !== 0) {
+    console.error('ffmpeg conversion failed.')
+    process.exit(3)
+  }
+  return { path: wavPath, isTmp: true }
+}
+
 async function runWhisper(voicePath) {
   // Check whisper.cpp exists
   try {
@@ -160,9 +182,18 @@ Then download a Chinese model:
     console.error(`Or set WHISPER_MODEL=<path> in env to point elsewhere.`)
     process.exit(3)
   }
+
+  // Auto-convert non-wav formats (m4a, mp3, ogg, flac …) to wav for whisper.cpp
+  const audio = ensureWav(voicePath)
   const out = join('/tmp', `dl-transcript-${Date.now()}`)
-  console.error(`Running whisper-cli on ${voicePath} (model: ${model})...`)
-  const r = spawnSync('whisper-cli', ['-m', model, '-l', 'zh', '-otxt', '-of', out, voicePath], { stdio: 'inherit' })
+  console.error(`Running whisper-cli on ${audio.path} (model: ${model})...`)
+  const r = spawnSync('whisper-cli', ['-m', model, '-l', 'zh', '-otxt', '-of', out, audio.path], { stdio: 'inherit' })
+
+  // Cleanup tmp wav if we made one
+  if (audio.isTmp) {
+    try { execSync(`rm -f ${audio.path}`) } catch { /* swallow */ }
+  }
+
   if (r.status !== 0) {
     console.error('whisper-cli failed.')
     process.exit(3)

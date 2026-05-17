@@ -151,6 +151,7 @@ function pageWrap({ title, bodyClass, stylesheet, inner }) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Long+Cang&family=Indie+Flower&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="${stylesheet}">
 </head>
 <body class="${bodyClass}">
@@ -220,70 +221,106 @@ ${sections}
 // ── CSS ───────────────────────────────────────────────────────────────────
 
 const CSS = `:root {
+  --paper: #e8dcb8;
+  --paper-tint: rgba(120, 90, 40, 0.04);
+  --ink: #3d2817;
+  --ink-soft: #5a4226;
+  --meta: #8a6f45;
+  --rule: #b29867;
+  --accent: #8b2c1a;
+  --hand: 'Long Cang', cursive;
+  --hand-sig-en: 'Indie Flower', cursive;
   --serif: 'Source Han Serif SC', 'Songti SC', 'Noto Serif CJK SC', 'Crimson Text', Georgia, serif;
-  --bg: #fafaf7;
-  --fg: #1a1a1a;
-  --meta: #888;
-  --rule: #ddd;
-  --link: #1a1a1a;
 }
 
 * { box-sizing: border-box; }
 
 body {
   font-family: var(--serif);
-  background: var(--bg);
-  color: var(--fg);
+  background:
+    radial-gradient(circle at 80% 10%, var(--paper-tint) 0%, transparent 40%),
+    radial-gradient(circle at 10% 90%, var(--paper-tint) 0%, transparent 50%),
+    var(--paper);
+  color: var(--ink);
   max-width: 36em;
   margin: 0 auto;
-  padding: 4rem 1.5rem 6rem;
+  padding: 5rem 2.5rem 6rem;
   font-size: 17px;
-  line-height: 1.75;
+  line-height: 1.95;
 }
 
-a { color: var(--link); }
-a:hover { opacity: 0.6; }
-
-.meta {
-  color: var(--meta);
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin: 0 0 1.5rem;
-}
+a { color: var(--ink); }
+a:hover { opacity: 0.65; }
 
 .back {
   color: var(--meta);
   text-decoration: none;
   font-size: 12px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
+  font-style: italic;
   display: inline-block;
   margin-bottom: 3rem;
 }
 
-h1 {
-  font-weight: 500;
-  font-size: 1.8rem;
-  letter-spacing: -0.01em;
-  margin: 0 0 2rem;
-  line-height: 1.3;
+.meta {
+  color: var(--meta);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin: 0 0 0.5rem;
+  font-style: italic;
 }
 
-h2 {
-  font-weight: 500;
-  font-size: 0.95rem;
-  margin: 3rem 0 1rem;
-  color: var(--meta);
+/* ── Letter page ──────────────────────────────────────────────────────── */
+
+.letter-page h1 {
+  font-family: var(--hand);
+  font-weight: 400;
+  font-size: 3.4rem;
+  margin: 0 0 0.5rem;
+  line-height: 1.15;
+  color: var(--ink);
   letter-spacing: 0.05em;
 }
 
-article p { margin: 1.2rem 0; }
+.letter-page h1::after {
+  content: '·';
+  display: block;
+  text-align: center;
+  color: var(--accent);
+  font-size: 1.2rem;
+  margin: 1rem 0 2.5rem;
+  letter-spacing: 0.5em;
+}
+
+/* 首段「亲爱的 5 岁的我，」用手写体 */
+.letter-page article p:nth-of-type(1) {
+  font-family: var(--hand);
+  font-size: 1.8rem;
+  color: var(--ink-soft);
+  margin: 0 0 2rem;
+  padding-left: 1.5em;
+  line-height: 1.5;
+}
+
+.letter-page article p { margin: 1.4rem 0; }
+
+/* signature 行：末段（含 "—— 即将死去的我，W01"） */
+.letter-page article p:last-of-type {
+  font-family: var(--hand);
+  font-size: 1.8rem;
+  text-align: right;
+  margin-top: 4rem;
+  padding-right: 0.5em;
+  color: var(--ink);
+  line-height: 1.4;
+}
 
 article blockquote {
   margin: 1.5rem 0;
   padding-left: 1.5rem;
   border-left: 2px solid var(--rule);
-  color: var(--meta);
+  color: var(--ink-soft);
   font-style: italic;
 }
 
@@ -296,38 +333,53 @@ article hr {
 .signature-meta {
   margin-top: 4rem;
   padding-top: 1.5rem;
-  border-top: 1px solid var(--rule);
+  border-top: 1px dashed var(--rule);
   font-size: 12px;
   color: var(--meta);
+  font-style: italic;
+  font-family: var(--serif);
 }
 
-.signature-meta p {
-  margin: 0.3rem 0;
-}
+.signature-meta p { margin: 0.3rem 0; }
 
 .signature-meta .label {
   display: inline-block;
   min-width: 3em;
   margin-right: 0.6em;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   font-size: 10px;
   vertical-align: 0.1em;
+  font-style: normal;
+  font-family: var(--serif);
 }
 
-/* index */
+/* ── Index page ────────────────────────────────────────────────────────── */
+
+.index-page h1 {
+  font-family: var(--hand);
+  font-weight: 400;
+  font-size: 3.4rem;
+  margin: 0 0 0.5rem;
+  line-height: 1.2;
+  color: var(--ink);
+  letter-spacing: 0.05em;
+}
 
 .tagline {
-  color: var(--meta);
+  color: var(--ink-soft);
   margin: 0.5rem 0 0.3rem;
   font-style: italic;
+  font-size: 15px;
 }
 
 .start {
   color: var(--meta);
-  font-size: 13px;
+  font-size: 12px;
   margin: 0 0 3rem;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.15em;
+  font-style: italic;
+  text-transform: uppercase;
 }
 
 .quarter {
@@ -335,11 +387,12 @@ article hr {
 }
 
 .quarter h2 {
-  font-size: 1rem;
-  margin: 0 0 0.8rem;
-  color: var(--fg);
-  text-transform: none;
-  letter-spacing: 0;
+  font-family: var(--hand);
+  font-size: 1.6rem;
+  font-weight: 400;
+  margin: 0 0 1rem;
+  color: var(--ink);
+  letter-spacing: 0.03em;
 }
 
 .quarter ul {
@@ -349,20 +402,26 @@ article hr {
 }
 
 .quarter li {
-  margin: 0.4rem 0;
+  margin: 0.5rem 0;
   font-size: 16px;
 }
 
 .quarter li a {
   text-decoration: none;
+  color: var(--ink);
+}
+
+.quarter li a:hover {
+  color: var(--accent);
 }
 
 .quarter .w {
   color: var(--meta);
-  font-size: 13px;
+  font-size: 12px;
   display: inline-block;
   min-width: 3.2em;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
+  font-style: italic;
 }
 
 .quarter.empty .empty-note {
@@ -375,10 +434,11 @@ article hr {
 .site-footer {
   margin-top: 5rem;
   padding-top: 2rem;
-  border-top: 1px solid var(--rule);
+  border-top: 1px dashed var(--rule);
   font-size: 12px;
   color: var(--meta);
   text-align: center;
+  font-style: italic;
 }
 
 .site-footer a { color: var(--meta); }

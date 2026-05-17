@@ -24,11 +24,21 @@ const SRC = join(ROOT, 'letters')
 const OUT = join(ROOT, 'docs')
 
 const QUARTERS = [
-  { id: 'q1-accident',   label: 'Q. I 死于意外',   sub: 'death by accident',   start: 1,  end: 13 },
-  { id: 'q2-choice',     label: 'Q. II 死于选择',  sub: 'death by choice',     start: 14, end: 26 },
-  { id: 'q3-oblivion',   label: 'Q. III 死于遗忘', sub: 'death by oblivion',   start: 27, end: 39 },
-  { id: 'q4-completion', label: 'Q. IV 死于完成',  sub: 'death by completion', start: 40, end: 52 },
+  { id: 'q1-accident',   label: 'Q. I 死于意外',   sub: 'death by accident',   start: 1,  end: 13, color: '#d96a7a', icon: 'star' },
+  { id: 'q2-choice',     label: 'Q. II 死于选择',  sub: 'death by choice',     start: 14, end: 26, color: '#6ba8c4', icon: 'arrow' },
+  { id: 'q3-oblivion',   label: 'Q. III 死于遗忘', sub: 'death by oblivion',   start: 27, end: 39, color: '#c79e3a', icon: 'cloud' },
+  { id: 'q4-completion', label: 'Q. IV 死于完成',  sub: 'death by completion', start: 40, end: 52, color: '#7aa86a', icon: 'house' },
 ]
+
+const ICONS = {
+  star:  `<svg class="q-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L14 9 L20 9 L15 13 L17 19 L12 15.5 L7 19 L9 13 L4 9 L10 9 Z" transform="rotate(-3 12 12)"/></svg>`,
+  arrow: `<svg class="q-icon" viewBox="0 0 24 24" width="24" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13 Q 8 8 13 12 T 21 11"/><path d="M17 7 L 21 11 L 17 15"/></svg>`,
+  cloud: `<svg class="q-icon" viewBox="0 0 28 18" width="26" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14 Q 2 14 2 10 Q 2 7 5 7 Q 5 3 9 3 Q 13 3 14 6 Q 18 5 20 8 Q 25 8 25 12 Q 25 14 22 14 Z"/></svg>`,
+  house: `<svg class="q-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 L12 4 L20 11"/><path d="M6 10 L6 19 L18 19 L18 10"/><path d="M10 19 L10 14 L14 14 L14 19"/></svg>`,
+  heart: `<svg class="deco-heart" viewBox="0 0 24 22" width="20" height="18" fill="currentColor"><path d="M12 21 C 3 14 3 6 8 4 C 10 3 11 4 12 6 C 13 4 14 3 16 4 C 21 6 21 14 12 21 Z" opacity="0.85"/></svg>`,
+  butterfly: `<svg class="deco-fly" viewBox="0 0 32 24" width="34" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16 12 Q 12 3 6 4 Q 2 6 4 12 Q 2 18 6 20 Q 12 21 16 12"/><path d="M16 12 Q 20 3 26 4 Q 30 6 28 12 Q 30 18 26 20 Q 20 21 16 12"/><line x1="16" y1="6" x2="16" y2="20"/></svg>`,
+  postmark: `<svg class="deco-stamp" viewBox="0 0 60 30" width="60" height="30" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="30" cy="15" rx="26" ry="12" stroke-dasharray="3 3"/><text x="30" y="13" font-size="7" font-family="serif" text-anchor="middle" fill="currentColor" stroke="none">死亡邮筒</text><text x="30" y="22" font-size="5" font-family="serif" text-anchor="middle" fill="currentColor" stroke="none">DEATH POST</text></svg>`,
+}
 
 // ── Markdown parser (minimal, hand-rolled, scoped to letter content) ──────
 
@@ -164,25 +174,29 @@ ${inner}
 }
 
 function letterPage(letter) {
-  // Extract title from first h1 in body; strip that h1 from body before rendering
   const titleMatch = letter.body.match(/^#\s+(.+)$/m)
   const title = titleMatch ? titleMatch[1].trim() : (letter.fm.slug || 'untitled').replace(/-/g, ' ')
   const bodyMd = letter.body.replace(/^#\s+.+$/m, '').trim()
   const bodyHtml = mdToHtml(bodyMd)
   const numStr = String(letter.fm.week ?? 0).padStart(2, '0')
-  const quarterSub = (QUARTERS.find(q => q.id === letter.quarter) || {}).sub || ''
-  const inner = `<article>
+  const q = QUARTERS.find(qq => qq.id === letter.quarter) || {}
+  const quarterSub = q.sub || ''
+  const quarterColor = q.color || 'var(--accent)'
+  const quarterIcon = ICONS[q.icon] || ''
+  const inner = `<article style="--q-color: ${quarterColor};">
 <a href="../index.html" class="back">← all letters</a>
 <header class="letter-header">
-<p class="number">no. ${numStr}</p>
+<p class="number">no. ${numStr} <span class="q-tag">${quarterIcon}</span></p>
 <h1>${escapeHtml(title)}</h1>
 <hr class="hairline">
 <p class="meta-line">${escapeHtml(letter.quarterLabel)} · ${escapeHtml(quarterSub)} · ${escapeHtml(letter.fm.date || '')}</p>
 </header>
 ${bodyHtml}
+<div class="deco-divider">${ICONS.heart}</div>
 <footer class="signature-meta">
 ${letter.fm.death_mode ? `<p><span class="label">death</span>${escapeHtml(letter.fm.death_mode)}</p>` : ''}
 ${letter.fm.childhood_anchor ? `<p><span class="label">anchor</span>${escapeHtml(letter.fm.childhood_anchor)}</p>` : ''}
+<div class="postmark">${ICONS.postmark}</div>
 </footer>
 </article>`
   return pageWrap({ title: `${title} — Death Letters`, bodyClass: 'letter-page', stylesheet: '../style.css', inner })
@@ -195,10 +209,11 @@ function indexPage(letters) {
 
   const sections = QUARTERS.map(q => {
     const items = byQuarter[q.id]
+    const icon = ICONS[q.icon] || ''
     const sub = `<p class="quarter-sub">${escapeHtml(q.sub)} · weeks ${q.start}–${q.end}</p>`
     if (items.length === 0) {
-      return `<section class="quarter empty">
-<h2>${escapeHtml(q.label)}</h2>
+      return `<section class="quarter empty" style="--q-color: ${q.color};">
+<h2><span class="q-icon-wrap">${icon}</span>${escapeHtml(q.label)}</h2>
 ${sub}
 <p class="empty-note">to come</p>
 </section>`
@@ -215,8 +230,8 @@ ${sub}
 <span class="date">${escapeHtml(l.fm.date || '')}</span>
 </a></li>`
     }).join('\n')
-    return `<section class="quarter">
-<h2>${escapeHtml(q.label)}</h2>
+    return `<section class="quarter" style="--q-color: ${q.color};">
+<h2><span class="q-icon-wrap">${icon}</span>${escapeHtml(q.label)}</h2>
 ${sub}
 <ul>
 ${lis}
@@ -225,6 +240,7 @@ ${lis}
   }).join('\n')
 
   const inner = `<header>
+<div class="title-flank">${ICONS.butterfly}</div>
 <h1>Death Letters</h1>
 <p class="tagline">52 周公开文学。"今晚我可能死去"的我，写给"5 岁的真实我"的信。</p>
 <p class="start">begins · 2026 / 05 / 24</p>
@@ -247,9 +263,13 @@ const CSS = `:root {
   --meta: #8a7d6a;
   --rule: #d4c6a8;
   --accent: #d96a7a;
-  --accent-soft: #efb8c0;
+  --rose:  #d96a7a;
+  --blue:  #6ba8c4;
+  --yellow:#c79e3a;
+  --green: #7aa86a;
   --hand: 'Caveat', 'Long Cang', 'Source Han Serif SC', 'Songti SC', cursive;
-  --body: 'Spectral', 'Source Han Serif SC', 'Songti SC', 'Noto Serif CJK SC', Georgia, serif;
+  --body: 'Long Cang', 'Caveat', 'Source Han Serif SC', 'Songti SC', cursive;
+  --serif-fallback: 'Source Han Serif SC', 'Songti SC', 'Noto Serif CJK SC', Georgia, serif;
 }
 
 * { box-sizing: border-box; }
@@ -261,11 +281,11 @@ body {
   font-weight: 400;
   background: var(--paper);
   color: var(--ink);
-  max-width: 38em;
+  max-width: 32em;
   margin: 0 auto;
-  padding: 5rem 2rem 7rem;
-  font-size: 17px;
-  line-height: 1.78;
+  padding: 4rem 2rem 6rem;
+  font-size: 22px;
+  line-height: 1.7;
   font-feature-settings: "kern", "liga", "calt";
   -webkit-font-smoothing: antialiased;
 }
@@ -301,21 +321,31 @@ a:hover { text-decoration-color: var(--accent); }
 .letter-page .number {
   font-family: var(--hand);
   font-weight: 500;
-  font-size: 1.2rem;
-  color: var(--accent);
-  letter-spacing: 0.08em;
+  font-size: 1.3rem;
+  color: var(--q-color, var(--accent));
+  letter-spacing: 0.05em;
   text-transform: lowercase;
   margin: 0 0 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+}
+
+.letter-page .q-tag {
+  color: var(--q-color, var(--accent));
+  display: inline-flex;
+  transform: rotate(-3deg);
 }
 
 .letter-page h1 {
   font-family: var(--hand);
   font-weight: 500;
-  font-size: 3.5rem;
+  font-size: 4rem;
   letter-spacing: 0.02em;
   color: var(--ink);
   margin: 0 0 1.2rem;
-  line-height: 1.15;
+  line-height: 1.1;
 }
 
 /* hand-drawn wavy hairline under title */
@@ -339,31 +369,38 @@ a:hover { text-decoration-color: var(--accent); }
 }
 
 .letter-page article p {
-  margin: 1.3rem 0;
+  margin: 1.4rem 0;
   text-align: left;
+  letter-spacing: 0.01em;
 }
 
-/* opening line ("亲爱的 5 岁的我，") — handwritten */
+/* opening line ("亲爱的 5 岁的我，") */
 .letter-page article p:nth-of-type(1) {
-  font-family: var(--hand);
-  font-weight: 500;
-  font-size: 1.8rem;
-  color: var(--ink);
+  font-size: 1.6rem;
+  color: var(--q-color, var(--accent));
   margin: 0 0 2rem;
   letter-spacing: 0.02em;
   line-height: 1.4;
 }
 
-/* signature 末段 — handwritten, right-aligned */
+/* signature 末段 — right-aligned */
 .letter-page article p:last-of-type {
-  font-family: var(--hand);
-  font-weight: 500;
   text-align: right;
-  font-size: 1.8rem;
-  color: var(--ink);
+  font-size: 1.5rem;
+  color: var(--ink-soft);
   margin: 3rem 0 0;
   letter-spacing: 0.02em;
   line-height: 1.4;
+}
+
+.deco-divider {
+  display: flex;
+  justify-content: center;
+  margin: 3rem 0 1.5rem;
+  color: var(--q-color, var(--accent));
+}
+.deco-heart {
+  transform: rotate(-8deg);
 }
 
 article blockquote {
@@ -384,31 +421,36 @@ article hr {
 }
 
 .signature-meta {
-  margin-top: 5rem;
-  padding-top: 1.8rem;
+  margin-top: 1.5rem;
+  padding-top: 0;
   border-top: 0;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 8' preserveAspectRatio='none'><path d='M0,4 q5,-4 10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0' stroke='%23d4c6a8' fill='none' stroke-width='1.5' stroke-linecap='round'/></svg>");
-  background-repeat: no-repeat;
-  background-position: top center;
-  background-size: 50% 8px;
   font-family: var(--hand);
   font-weight: 500;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   color: var(--meta);
   text-align: center;
   letter-spacing: 0.02em;
 }
 
-.signature-meta p { margin: 0.5rem 0; }
+.signature-meta p { margin: 0.4rem 0; }
 
 .signature-meta .label {
-  font-family: var(--body);
-  font-variant: small-caps;
-  letter-spacing: 0.15em;
-  margin-right: 0.6em;
-  font-size: 10px;
-  color: var(--accent);
+  font-family: 'Caveat', cursive;
+  letter-spacing: 0.1em;
+  margin-right: 0.5em;
+  font-size: 1rem;
+  color: var(--q-color, var(--rose));
   font-weight: 500;
+  text-transform: lowercase;
+}
+
+.postmark {
+  display: flex;
+  justify-content: center;
+  margin-top: 2.5rem;
+  color: var(--q-color, var(--accent));
+  transform: rotate(-6deg);
+  opacity: 0.85;
 }
 
 /* ── Index page ────────────────────────────────────────────────────────── */
@@ -418,30 +460,39 @@ article hr {
   margin-bottom: 5rem;
 }
 
+.title-flank {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  color: var(--rose);
+}
+
 .index-page h1 {
   font-family: var(--hand);
   font-weight: 600;
-  font-size: 4.5rem;
+  font-size: 5rem;
   letter-spacing: 0.02em;
   color: var(--ink);
   margin: 0 0 0.8rem;
-  line-height: 1.1;
+  line-height: 1.05;
 }
 
 .tagline {
-  font-family: var(--body);
+  font-family: var(--hand);
+  font-weight: 500;
   color: var(--ink-soft);
-  font-size: 14px;
+  font-size: 1.25rem;
   margin: 0 auto 1.2rem;
   max-width: 28em;
   line-height: 1.5;
+  letter-spacing: 0.01em;
 }
 
 .start {
   font-family: var(--hand);
   font-weight: 500;
-  font-size: 1.2rem;
-  color: var(--accent);
+  font-size: 1.3rem;
+  color: var(--rose);
   letter-spacing: 0.03em;
   margin: 0;
 }
@@ -453,18 +504,29 @@ article hr {
 .quarter h2 {
   font-family: var(--hand);
   font-weight: 500;
-  font-size: 2rem;
-  color: var(--ink);
+  font-size: 2.3rem;
+  color: var(--q-color, var(--ink));
   margin: 0 0 0.2rem;
   letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.q-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  color: var(--q-color);
+  transform: rotate(-4deg);
 }
 
 .quarter-sub {
-  font-family: var(--body);
-  font-size: 13px;
+  font-family: 'Caveat', cursive;
+  font-size: 1.05rem;
   color: var(--meta);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
   margin: 0 0 1.4rem;
+  padding-left: 1.6em;
 }
 
 .quarter ul {
@@ -475,7 +537,8 @@ article hr {
 
 .quarter li {
   margin: 0.7rem 0;
-  font-size: 16px;
+  font-size: 1.1rem;
+  padding-left: 1.6em;
 }
 
 .quarter li a {
@@ -488,16 +551,18 @@ article hr {
 
 .quarter li .num {
   font-family: var(--hand);
-  color: var(--accent);
-  font-size: 1.1rem;
+  color: var(--q-color, var(--accent));
+  font-size: 1.15rem;
   letter-spacing: 0.03em;
   flex-shrink: 0;
   width: 4em;
 }
 
 .quarter li .title {
+  font-family: var(--hand);
   color: var(--ink);
   flex-shrink: 0;
+  font-size: 1.2rem;
 }
 
 /* hand-drawn wavy leader instead of dotted */
@@ -517,22 +582,21 @@ article hr {
 .quarter li .date {
   font-family: var(--hand);
   color: var(--meta);
-  font-size: 1rem;
+  font-size: 1.05rem;
   letter-spacing: 0.02em;
   flex-shrink: 0;
 }
 
-.quarter li a:hover .title { color: var(--accent); }
-.quarter li a:hover .leader {
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 8' preserveAspectRatio='none'><path d='M0,4 q5,-4 10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0' stroke='%23d96a7a' fill='none' stroke-width='1.5' stroke-linecap='round'/></svg>");
-}
+.quarter li a:hover .title { color: var(--q-color, var(--accent)); }
 
 .quarter.empty .empty-note {
   font-family: var(--hand);
-  color: var(--meta);
-  font-size: 1.2rem;
+  color: var(--q-color, var(--meta));
+  opacity: 0.6;
+  font-size: 1.3rem;
   letter-spacing: 0.02em;
   margin: 0;
+  padding-left: 1.6em;
 }
 
 .site-footer {

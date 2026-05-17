@@ -153,7 +153,7 @@ function pageWrap({ title, bodyClass, stylesheet, inner }) {
 <title>${escapeHtml(title)}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Spectral:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600&family=Long+Cang&family=Spectral:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="${stylesheet}">
 </head>
 <body class="${bodyClass}">
@@ -241,13 +241,14 @@ ${sections}
 // ── CSS ───────────────────────────────────────────────────────────────────
 
 const CSS = `:root {
-  --paper: #f5f0e2;
-  --ink: #1a1a1a;
-  --ink-soft: #3a3a3a;
-  --meta: #797569;
-  --rule: #cfc5b0;
-  --accent: #a8281d;
-  --display: 'Cormorant Garamond', 'Source Han Serif SC', 'Songti SC', 'Noto Serif CJK SC', serif;
+  --paper: #faf3e2;
+  --ink: #2a2218;
+  --ink-soft: #4a3f30;
+  --meta: #8a7d6a;
+  --rule: #d4c6a8;
+  --accent: #d96a7a;
+  --accent-soft: #efb8c0;
+  --hand: 'Caveat', 'Long Cang', 'Source Han Serif SC', 'Songti SC', cursive;
   --body: 'Spectral', 'Source Han Serif SC', 'Songti SC', 'Noto Serif CJK SC', Georgia, serif;
 }
 
@@ -280,12 +281,11 @@ a {
 a:hover { text-decoration-color: var(--accent); }
 
 .back {
-  font-family: var(--display);
-  font-style: normal;
+  font-family: var(--hand);
   color: var(--meta);
   text-decoration: none;
-  font-size: 14px;
-  letter-spacing: 0.05em;
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
   display: inline-block;
   margin-bottom: 4.5rem;
 }
@@ -299,44 +299,43 @@ a:hover { text-decoration-color: var(--accent); }
 }
 
 .letter-page .number {
-  font-family: var(--display);
-  font-style: normal;
-  font-weight: 400;
-  font-size: 0.95rem;
-  color: var(--meta);
-  letter-spacing: 0.25em;
+  font-family: var(--hand);
+  font-weight: 500;
+  font-size: 1.2rem;
+  color: var(--accent);
+  letter-spacing: 0.08em;
   text-transform: lowercase;
-  margin: 0 0 1.8rem;
+  margin: 0 0 0.8rem;
 }
 
 .letter-page h1 {
-  font-family: var(--display);
-  font-style: normal;
+  font-family: var(--hand);
   font-weight: 500;
-  font-size: 2.8rem;
-  letter-spacing: 0;
+  font-size: 3.5rem;
+  letter-spacing: 0.02em;
   color: var(--ink);
-  margin: 0 0 1.5rem;
-  line-height: 1.18;
+  margin: 0 0 1.2rem;
+  line-height: 1.15;
 }
 
+/* hand-drawn wavy hairline under title */
 .letter-page .hairline {
   display: block;
-  width: 3.5em;
-  height: 0;
+  width: 5em;
+  height: 8px;
   margin: 0 auto 1.5rem;
   border: 0;
-  border-top: 1px solid var(--ink);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 8' preserveAspectRatio='none'><path d='M0,4 q5,-4 10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0' stroke='%23d96a7a' fill='none' stroke-width='1.8' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 }
 
 .letter-page .meta-line {
-  font-family: var(--display);
-  font-style: normal;
-  font-size: 0.85rem;
+  font-family: var(--hand);
+  font-size: 1.05rem;
   color: var(--meta);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.02em;
   margin: 0;
-  text-transform: lowercase;
 }
 
 .letter-page article p {
@@ -344,49 +343,57 @@ a:hover { text-decoration-color: var(--accent); }
   text-align: left;
 }
 
-/* opening line ("亲爱的 5 岁的我，") — emphasis */
+/* opening line ("亲爱的 5 岁的我，") — handwritten */
 .letter-page article p:nth-of-type(1) {
+  font-family: var(--hand);
   font-weight: 500;
-  margin-top: 0;
+  font-size: 1.8rem;
+  color: var(--ink);
+  margin: 0 0 2rem;
   letter-spacing: 0.02em;
+  line-height: 1.4;
 }
 
-/* signature 末段 — italic, right-aligned, smaller */
+/* signature 末段 — handwritten, right-aligned */
 .letter-page article p:last-of-type {
-  font-family: var(--display);
-  font-style: normal;
-  font-weight: 400;
+  font-family: var(--hand);
+  font-weight: 500;
   text-align: right;
-  font-size: 1.05rem;
-  color: var(--ink-soft);
+  font-size: 1.8rem;
+  color: var(--ink);
   margin: 3rem 0 0;
   letter-spacing: 0.02em;
+  line-height: 1.4;
 }
 
 article blockquote {
   margin: 1.5rem 1.5rem;
-  font-style: normal;
   color: var(--ink-soft);
-  font-family: var(--display);
-  font-size: 1.05rem;
+  font-family: var(--hand);
+  font-size: 1.3rem;
 }
 
 article hr {
   border: none;
-  width: 3em;
-  height: 0;
+  width: 5em;
+  height: 8px;
   margin: 2.5rem auto;
-  border-top: 1px solid var(--rule);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 8' preserveAspectRatio='none'><path d='M0,4 q5,-4 10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0' stroke='%23d4c6a8' fill='none' stroke-width='1.5' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 }
 
 .signature-meta {
   margin-top: 5rem;
   padding-top: 1.8rem;
-  border-top: 1px solid var(--rule);
-  font-family: var(--display);
-  font-style: normal;
-  font-weight: 400;
-  font-size: 13px;
+  border-top: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 8' preserveAspectRatio='none'><path d='M0,4 q5,-4 10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0' stroke='%23d4c6a8' fill='none' stroke-width='1.5' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: 50% 8px;
+  font-family: var(--hand);
+  font-weight: 500;
+  font-size: 1.1rem;
   color: var(--meta);
   text-align: center;
   letter-spacing: 0.02em;
@@ -395,12 +402,13 @@ article hr {
 .signature-meta p { margin: 0.5rem 0; }
 
 .signature-meta .label {
-  font-style: normal;
+  font-family: var(--body);
   font-variant: small-caps;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.15em;
   margin-right: 0.6em;
   font-size: 10px;
-  color: var(--ink-soft);
+  color: var(--accent);
+  font-weight: 500;
 }
 
 /* ── Index page ────────────────────────────────────────────────────────── */
@@ -411,11 +419,10 @@ article hr {
 }
 
 .index-page h1 {
-  font-family: var(--display);
-  font-style: normal;
-  font-weight: 500;
-  font-size: 4rem;
-  letter-spacing: 0;
+  font-family: var(--hand);
+  font-weight: 600;
+  font-size: 4.5rem;
+  letter-spacing: 0.02em;
   color: var(--ink);
   margin: 0 0 0.8rem;
   line-height: 1.1;
@@ -425,21 +432,18 @@ article hr {
   font-family: var(--body);
   color: var(--ink-soft);
   font-size: 14px;
-  font-style: normal;
   margin: 0 auto 1.2rem;
   max-width: 28em;
   line-height: 1.5;
 }
 
 .start {
-  font-family: var(--display);
-  font-style: normal;
+  font-family: var(--hand);
   font-weight: 500;
-  font-size: 11px;
+  font-size: 1.2rem;
   color: var(--accent);
-  letter-spacing: 0.35em;
+  letter-spacing: 0.03em;
   margin: 0;
-  text-transform: uppercase;
 }
 
 .quarter {
@@ -447,23 +451,20 @@ article hr {
 }
 
 .quarter h2 {
-  font-family: var(--display);
-  font-style: normal;
+  font-family: var(--hand);
   font-weight: 500;
-  font-size: 1.6rem;
+  font-size: 2rem;
   color: var(--ink);
-  margin: 0 0 0.3rem;
-  letter-spacing: 0.01em;
+  margin: 0 0 0.2rem;
+  letter-spacing: 0.02em;
 }
 
 .quarter-sub {
-  font-family: var(--display);
-  font-style: normal;
+  font-family: var(--body);
   font-size: 13px;
   color: var(--meta);
   letter-spacing: 0.05em;
   margin: 0 0 1.4rem;
-  text-transform: lowercase;
 }
 
 .quarter ul {
@@ -473,7 +474,7 @@ article hr {
 }
 
 .quarter li {
-  margin: 0.65rem 0;
+  margin: 0.7rem 0;
   font-size: 16px;
 }
 
@@ -486,14 +487,12 @@ article hr {
 }
 
 .quarter li .num {
-  font-family: var(--display);
-  font-style: normal;
-  color: var(--meta);
-  font-size: 13px;
-  letter-spacing: 0.1em;
+  font-family: var(--hand);
+  color: var(--accent);
+  font-size: 1.1rem;
+  letter-spacing: 0.03em;
   flex-shrink: 0;
   width: 4em;
-  text-transform: lowercase;
 }
 
 .quarter li .title {
@@ -501,44 +500,54 @@ article hr {
   flex-shrink: 0;
 }
 
+/* hand-drawn wavy leader instead of dotted */
 .quarter li .leader {
   flex: 1;
   min-width: 1em;
-  border-bottom: 1px dotted var(--rule);
-  transform: translateY(-0.25em);
+  height: 8px;
   margin: 0 0.4em;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 8' preserveAspectRatio='none'><path d='M0,4 q5,-4 10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0' stroke='%23d4c6a8' fill='none' stroke-width='1.5' stroke-linecap='round'/></svg>");
+  background-repeat: repeat-x;
+  background-size: 40px 8px;
+  background-position: center;
+  align-self: center;
+  transform: translateY(0.1em);
 }
 
 .quarter li .date {
-  font-family: var(--display);
-  font-style: normal;
+  font-family: var(--hand);
   color: var(--meta);
-  font-size: 13px;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
   flex-shrink: 0;
 }
 
 .quarter li a:hover .title { color: var(--accent); }
-.quarter li a:hover .leader { border-bottom-color: var(--accent); }
+.quarter li a:hover .leader {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 8' preserveAspectRatio='none'><path d='M0,4 q5,-4 10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0' stroke='%23d96a7a' fill='none' stroke-width='1.5' stroke-linecap='round'/></svg>");
+}
 
 .quarter.empty .empty-note {
-  font-family: var(--display);
-  font-style: normal;
+  font-family: var(--hand);
   color: var(--meta);
-  font-size: 14px;
-  letter-spacing: 0.05em;
+  font-size: 1.2rem;
+  letter-spacing: 0.02em;
   margin: 0;
 }
 
 .site-footer {
   margin-top: 6rem;
   padding-top: 2rem;
-  border-top: 1px solid var(--rule);
-  font-family: var(--display);
-  font-style: normal;
-  font-size: 12px;
+  border-top: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 8' preserveAspectRatio='none'><path d='M0,4 q5,-4 10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0 t10,0' stroke='%23d4c6a8' fill='none' stroke-width='1.5' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: 30% 8px;
+  font-family: var(--hand);
+  font-size: 1rem;
   color: var(--meta);
   text-align: center;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
 }
 
 .site-footer a { color: var(--meta); }

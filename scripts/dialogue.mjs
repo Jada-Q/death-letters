@@ -22,7 +22,7 @@ import { join, dirname } from 'node:path'
 import { execSync, spawnSync } from 'node:child_process'
 import { createInterface } from 'node:readline/promises'
 import { stdin, stdout } from 'node:process'
-// dotenv + Anthropic SDK are dynamic-imported in main() — dry-run works without them
+// Calls Claude via `claude` CLI (Max subscription auth) — no @anthropic-ai/sdk needed.
 
 // ── Constants ─────────────────────────────────────────────────────────────
 
@@ -44,6 +44,36 @@ const QUARTERS = [
 ]
 
 const MODEL = 'claude-opus-4-7'  // 公开 confirmed model id
+
+// ── Claude CLI invocation ─────────────────────────────────────────────────
+// Spawns `claude --print` subprocess. Uses Max subscription auth (no --bare).
+// Returns the `.result` string from JSON output. Throws on failure.
+function callClaude({ systemPrompt, userMessage, maxTokens = 4000, model = MODEL }) {
+  const args = [
+    '--print',
+    '--output-format', 'json',
+    '--model', model,
+    '--system-prompt', systemPrompt,
+    userMessage,
+  ]
+  const r = spawnSync('claude', args, {
+    encoding: 'utf8',
+    timeout: 180000,  // 3 min cap
+    maxBuffer: 20 * 1024 * 1024,
+  })
+  if (r.error) throw new Error(`spawn claude failed: ${r.error.message}`)
+  if (r.status !== 0) {
+    throw new Error(`claude exit ${r.status}: ${r.stderr || r.stdout.slice(0, 500)}`)
+  }
+  let parsed
+  try { parsed = JSON.parse(r.stdout) } catch (e) {
+    throw new Error(`claude stdout not JSON: ${r.stdout.slice(0, 300)}`)
+  }
+  if (parsed.is_error) {
+    throw new Error(`claude api error: ${parsed.api_error_status || parsed.result}`)
+  }
+  return parsed.result
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -159,7 +189,7 @@ async function confirmTranscript(transcript, rl) {
   return transcript
 }
 
-async function generateFollowups(client, transcript, week, quarter, qWeek, prevExcerpt) {
+function generateFollowups(transcript, week, quarter, qWeek, prevExcerpt) {
   const systemPrompt = `你是 Jada 这周 death-letter 项目的对话伙伴。她刚录了一段语音 dump（transcript 见下面 user message）。
 
 当前是 W${week}（${quarter.id} 季中第 ${qWeek} 周）。
@@ -175,13 +205,11 @@ ${prevExcerpt ? `上 1 周信件节选（参考、不要复用）:\n---\n${prevE
 
 输出格式：每行一个问题，不编号，不加引号，无前置解释。`
 
-  const msg = await client.messages.create({
-    model: MODEL,
-    max_tokens: 800,
-    system: systemPrompt,
-    messages: [{ role: 'user', content: `本周语音 transcript:\n${transcript}` }],
+  const text = callClaude({
+    systemPrompt,
+    userMessage: `本周语音 transcript:\n${transcript}`,
   })
-  return msg.content[0].text.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0)
+  return text.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0)
 }
 
 async function collectAnswers(questions, rl) {
@@ -201,7 +229,7 @@ async function collectAnswers(questions, rl) {
   return answers
 }
 
-async function generateLetter(client, transcript, questions, answers, week, quarter, qWeek) {
+function generateLetter(transcript, questions, answers, week, quarter, qWeek) {
   const qa = questions.map((q, i) => `Q: ${q}\nA: ${answers[i] || '(留空)'}`).join('\n\n')
   const systemPrompt = `你是 Jada 这周 death-letter 项目的共创者。基于她的语音 dump、你提的追问、她的回答，写一封信。
 
@@ -222,13 +250,10 @@ async function generateLetter(client, transcript, questions, answers, week, quar
 5. 第五行：空行
 6. 之后：信件正文（以"亲爱的 5 岁的我，"开始，以"—— 即将死去的我，W${pad2(week)}"结束）`
 
-  const msg = await client.messages.create({
-    model: MODEL,
-    max_tokens: 2500,
-    system: systemPrompt,
-    messages: [{ role: 'user', content: `Transcript:\n${transcript}\n\nQ&A:\n${qa}` }],
-  })
-  return msg.content[0].text.trim()
+  return callClaude({
+    systemPrompt,
+    userMessage: `Transcript:\n${transcript}\n\nQ&A:\n${qa}`,
+  }).trim()
 }
 
 function parseLetterOutput(raw) {
@@ -322,12 +347,10 @@ async function main() {
     process.exit(0)
   }
 
-  // Load deps only when actually calling Claude
-  await import('dotenv/config')
-  const Anthropic = (await import('@anthropic-ai/sdk')).default
-
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.error('ERROR: ANTHROPIC_API_KEY missing. Copy to clipboard, then: pbpaste > .env.local')
+  // Sanity check: `claude` CLI on PATH (Max subscription auth used)
+  const checkClaude = spawnSync('claude', ['--version'], { encoding: 'utf8', timeout: 10000 })
+  if (checkClaude.status !== 0) {
+    console.error('ERROR: `claude` CLI not found or not working. Install Claude Code first.')
     process.exit(4)
   }
 
@@ -369,17 +392,16 @@ async function main() {
   if (prevPath) console.error(`Prev letter context loaded from ${prevPath}\n`)
 
   // 3. Generate followups
-  const client = new Anthropic()  // eslint-disable-line no-undef -- imported dynamically above
-  console.error('Generating followups...')
-  const questions = await generateFollowups(client, transcript, week, quarter, qWeek, prevExcerpt)
+  console.error('Generating followups via claude CLI (Max subscription)...')
+  const questions = generateFollowups(transcript, week, quarter, qWeek, prevExcerpt)
   console.error(`Got ${questions.length} questions.`)
 
   // 4. Collect answers
   const answers = await collectAnswers(questions, rl)
 
   // 5. Generate letter
-  console.error('\nGenerating letter draft...')
-  const raw = await generateLetter(client, transcript, questions, answers, week, quarter, qWeek)
+  console.error('\nGenerating letter draft via claude CLI...')
+  const raw = generateLetter(transcript, questions, answers, week, quarter, qWeek)
   const parsed = parseLetterOutput(raw)
 
   // 6. Write files

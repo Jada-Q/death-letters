@@ -13,6 +13,7 @@
 import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { homedir } from 'node:os'
+import { spawnSync } from 'node:child_process'
 
 const PROJECT_ROOT = join(homedir(), 'Desktop', 'Projects', 'death-letters')
 const QUARTER_MAP = {
@@ -22,6 +23,34 @@ const QUARTER_MAP = {
   q4: 'q4-completion',
 }
 const MODEL = 'claude-opus-4-7'
+
+// Calls Claude via `claude` CLI subprocess (Max subscription auth — no API key billing).
+function callClaude({ systemPrompt, userMessage, model = MODEL }) {
+  const args = [
+    '--print',
+    '--output-format', 'json',
+    '--model', model,
+    '--system-prompt', systemPrompt,
+    userMessage,
+  ]
+  const r = spawnSync('claude', args, {
+    encoding: 'utf8',
+    timeout: 300000,  // 5 min for translation
+    maxBuffer: 20 * 1024 * 1024,
+  })
+  if (r.error) throw new Error(`spawn claude failed: ${r.error.message}`)
+  if (r.status !== 0) {
+    throw new Error(`claude exit ${r.status}: ${r.stderr || r.stdout.slice(0, 500)}`)
+  }
+  let parsed
+  try { parsed = JSON.parse(r.stdout) } catch (e) {
+    throw new Error(`claude stdout not JSON: ${r.stdout.slice(0, 300)}`)
+  }
+  if (parsed.is_error) {
+    throw new Error(`claude api error: ${parsed.api_error_status || parsed.result}`)
+  }
+  return parsed.result
+}
 
 const LANG_INSTRUCT = {
   ja: {
@@ -71,7 +100,7 @@ function parseFrontmatter(raw) {
   return { fm: m[1], body: m[2].trim() }
 }
 
-async function translate(client, content, lang) {
+function translate(content, lang) {
   const ins = LANG_INSTRUCT[lang]
   const systemPrompt = `あなたは文学翻訳者です。中国語の death-letter（死を想起しつつ 5 歳の自分に書く手紙）を ${ins.name} に翻訳します。
 
@@ -84,13 +113,10 @@ async function translate(client, content, lang) {
 - 翻訳に注釈が必要な箇所には [^1] のような numbered footnote を挿入し、本文の最後に注釈リストを置く。
 - 不要な意訳や付け足しは禁止。中国語原文の sparse な質感を壊さない。`
 
-  const msg = await client.messages.create({
-    model: MODEL,
-    max_tokens: 4000,
-    system: systemPrompt,
-    messages: [{ role: 'user', content }],
-  })
-  return msg.content[0].text.trim()
+  return callClaude({
+    systemPrompt,
+    userMessage: content,
+  }).trim()
 }
 
 async function main() {
@@ -109,13 +135,12 @@ async function main() {
   const letter = findEndLetter(fullQuarter)
   console.error(`Found end letter: ${letter.path}\n`)
 
-  await import('dotenv/config')
-  const Anthropic = (await import('@anthropic-ai/sdk')).default
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.error('ERROR: ANTHROPIC_API_KEY missing.')
+  // Sanity check claude CLI
+  const check = spawnSync('claude', ['--version'], { encoding: 'utf8', timeout: 10000 })
+  if (check.status !== 0) {
+    console.error('ERROR: `claude` CLI not found. Install Claude Code first.')
     process.exit(4)
   }
-  const client = new Anthropic()
 
   const langs = args.lang === 'both' ? ['ja', 'en'] : [args.lang]
   const outDir = join(PROJECT_ROOT, 'translations')
@@ -128,8 +153,8 @@ async function main() {
       console.error(`SKIP: ${outPath} exists. Use --force to overwrite.`)
       continue
     }
-    console.error(`Translating to ${lang}...`)
-    const translated = await translate(client, letter.content, lang)
+    console.error(`Translating to ${lang} via claude CLI (Max subscription)...`)
+    const translated = translate(letter.content, lang)
     writeFileSync(outPath, translated)
     written.push(outPath)
     console.error(`✓ ${outPath} (${translated.length} chars)`)

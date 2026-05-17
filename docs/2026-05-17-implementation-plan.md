@@ -95,9 +95,11 @@ voice/
 
 （版本号到 install 时按 `npm view` 实查，不在此 hardcode）
 
-### 1.5 `.env.local`（你做）
+### 1.5 `.env.local`（已废弃 — 2026-05-17 改造）
 
-`pbpaste > ~/Desktop/Projects/death-letters/.env.local` 前先把 `ANTHROPIC_API_KEY=sk-ant-...` 复制到剪贴板。
+**不再需要**。dialogue.mjs / translate.mjs 已改成走 `claude` CLI 子进程，用 Max 订阅认证，无需 API key。
+
+历史保留：旧版（SDK 模式）需要 `ANTHROPIC_API_KEY=<your-key>` 写到 `.env.local`。
 
 ### 1.6 `ANONYMIZE-CHECKLIST.md` 模板（我建占位，你填）
 

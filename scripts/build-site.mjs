@@ -24,10 +24,10 @@ const SRC = join(ROOT, 'letters')
 const OUT = join(ROOT, 'docs')
 
 const QUARTERS = [
-  { id: 'q1-accident',   label: 'Q1 — 死于意外' },
-  { id: 'q2-choice',     label: 'Q2 — 死于选择' },
-  { id: 'q3-oblivion',   label: 'Q3 — 死于遗忘' },
-  { id: 'q4-completion', label: 'Q4 — 死于完成' },
+  { id: 'q1-accident',   label: 'Q. I 死于意外',   sub: 'death by accident',   start: 1,  end: 13 },
+  { id: 'q2-choice',     label: 'Q. II 死于选择',  sub: 'death by choice',     start: 14, end: 26 },
+  { id: 'q3-oblivion',   label: 'Q. III 死于遗忘', sub: 'death by oblivion',   start: 27, end: 39 },
+  { id: 'q4-completion', label: 'Q. IV 死于完成',  sub: 'death by completion', start: 40, end: 52 },
 ]
 
 // ── Markdown parser (minimal, hand-rolled, scoped to letter content) ──────
@@ -151,7 +151,9 @@ function pageWrap({ title, bodyClass, stylesheet, inner }) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)}</title>
-<link href="https://fonts.googleapis.com/css2?family=Long+Cang&family=Indie+Flower&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Spectral:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="${stylesheet}">
 </head>
 <body class="${bodyClass}">
@@ -162,17 +164,25 @@ ${inner}
 }
 
 function letterPage(letter) {
-  const bodyHtml = mdToHtml(letter.body)
-  const title = letter.fm.slug ? letter.fm.slug.replace(/-/g, ' ') : 'untitled'
+  // Extract title from first h1 in body; strip that h1 from body before rendering
+  const titleMatch = letter.body.match(/^#\s+(.+)$/m)
+  const title = titleMatch ? titleMatch[1].trim() : (letter.fm.slug || 'untitled').replace(/-/g, ' ')
+  const bodyMd = letter.body.replace(/^#\s+.+$/m, '').trim()
+  const bodyHtml = mdToHtml(bodyMd)
+  const numStr = String(letter.fm.week ?? 0).padStart(2, '0')
+  const quarterSub = (QUARTERS.find(q => q.id === letter.quarter) || {}).sub || ''
   const inner = `<article>
 <a href="../index.html" class="back">← all letters</a>
-<header>
-<p class="meta">W${escapeHtml(letter.fm.week || '?')} · ${escapeHtml(letter.fm.date || '')} · ${escapeHtml(letter.quarterLabel)}</p>
+<header class="letter-header">
+<p class="number">no. ${numStr}</p>
+<h1>${escapeHtml(title)}</h1>
+<hr class="hairline">
+<p class="meta-line">${escapeHtml(letter.quarterLabel)} · ${escapeHtml(quarterSub)} · ${escapeHtml(letter.fm.date || '')}</p>
 </header>
 ${bodyHtml}
 <footer class="signature-meta">
-${letter.fm.death_mode ? `<p><span class="label">死法</span>${escapeHtml(letter.fm.death_mode)}</p>` : ''}
-${letter.fm.childhood_anchor ? `<p><span class="label">童年</span>${escapeHtml(letter.fm.childhood_anchor)}</p>` : ''}
+${letter.fm.death_mode ? `<p><span class="label">death</span>${escapeHtml(letter.fm.death_mode)}</p>` : ''}
+${letter.fm.childhood_anchor ? `<p><span class="label">anchor</span>${escapeHtml(letter.fm.childhood_anchor)}</p>` : ''}
 </footer>
 </article>`
   return pageWrap({ title: `${title} — Death Letters`, bodyClass: 'letter-page', stylesheet: '../style.css', inner })
@@ -185,19 +195,29 @@ function indexPage(letters) {
 
   const sections = QUARTERS.map(q => {
     const items = byQuarter[q.id]
+    const sub = `<p class="quarter-sub">${escapeHtml(q.sub)} · weeks ${q.start}–${q.end}</p>`
     if (items.length === 0) {
       return `<section class="quarter empty">
 <h2>${escapeHtml(q.label)}</h2>
-<p class="empty-note">等待 W${q.id === 'q1-accident' ? '1-13' : q.id === 'q2-choice' ? '14-26' : q.id === 'q3-oblivion' ? '27-39' : '40-52'} 的信件</p>
+${sub}
+<p class="empty-note">to come</p>
 </section>`
     }
     const lis = items.map(l => {
       const slug = l.fm.slug || l.filename.replace(/\.md$/, '')
       const titleFromBody = (l.body.match(/^#\s+(.+)$/m) || [, slug.replace(/-/g, ' ')])[1]
-      return `<li><a href="${l.quarter}/${l.filename.replace(/\.md$/, '.html')}"><span class="w">W${escapeHtml(l.fm.week || '?')}</span> · ${escapeHtml(titleFromBody)}</a></li>`
+      const numStr = String(l.fm.week ?? 0).padStart(2, '0')
+      const href = `${l.quarter}/${l.filename.replace(/\.md$/, '.html')}`
+      return `<li><a href="${href}">
+<span class="num">no. ${numStr}</span>
+<span class="title">${escapeHtml(titleFromBody)}</span>
+<span class="leader"></span>
+<span class="date">${escapeHtml(l.fm.date || '')}</span>
+</a></li>`
     }).join('\n')
     return `<section class="quarter">
 <h2>${escapeHtml(q.label)}</h2>
+${sub}
 <ul>
 ${lis}
 </ul>
@@ -207,13 +227,13 @@ ${lis}
   const inner = `<header>
 <h1>Death Letters</h1>
 <p class="tagline">52 周公开文学。"今晚我可能死去"的我，写给"5 岁的真实我"的信。</p>
-<p class="start">W1 起跑：2026-05-24</p>
+<p class="start">begins · 2026 / 05 / 24</p>
 </header>
 <main>
 ${sections}
 </main>
 <footer class="site-footer">
-<p>source: <a href="https://github.com/Jada-Q/death-letters">github.com/Jada-Q/death-letters</a></p>
+<p>source · <a href="https://github.com/Jada-Q/death-letters">github.com/Jada-Q/death-letters</a></p>
 </footer>`
   return pageWrap({ title: 'Death Letters', bodyClass: 'index-page', stylesheet: 'style.css', inner })
 }
@@ -221,178 +241,229 @@ ${sections}
 // ── CSS ───────────────────────────────────────────────────────────────────
 
 const CSS = `:root {
-  --paper: #e8dcb8;
-  --paper-tint: rgba(120, 90, 40, 0.04);
-  --ink: #3d2817;
-  --ink-soft: #5a4226;
-  --meta: #8a6f45;
-  --rule: #b29867;
-  --accent: #8b2c1a;
-  --hand: 'Long Cang', cursive;
-  --hand-sig-en: 'Indie Flower', cursive;
-  --serif: 'Source Han Serif SC', 'Songti SC', 'Noto Serif CJK SC', 'Crimson Text', Georgia, serif;
+  --paper: #f5f0e2;
+  --ink: #1a1a1a;
+  --ink-soft: #3a3a3a;
+  --meta: #797569;
+  --rule: #cfc5b0;
+  --accent: #a8281d;
+  --display: 'Cormorant Garamond', 'Source Han Serif SC', 'Songti SC', 'Noto Serif CJK SC', serif;
+  --body: 'Spectral', 'Source Han Serif SC', 'Songti SC', 'Noto Serif CJK SC', Georgia, serif;
 }
 
 * { box-sizing: border-box; }
 
+::selection { background: var(--accent); color: var(--paper); }
+
 body {
-  font-family: var(--serif);
-  background:
-    radial-gradient(circle at 80% 10%, var(--paper-tint) 0%, transparent 40%),
-    radial-gradient(circle at 10% 90%, var(--paper-tint) 0%, transparent 50%),
-    var(--paper);
+  font-family: var(--body);
+  font-weight: 400;
+  background: var(--paper);
   color: var(--ink);
-  max-width: 36em;
+  max-width: 38em;
   margin: 0 auto;
-  padding: 5rem 2.5rem 6rem;
+  padding: 5rem 2rem 7rem;
   font-size: 17px;
-  line-height: 1.95;
+  line-height: 1.78;
+  font-feature-settings: "kern", "liga", "calt";
+  -webkit-font-smoothing: antialiased;
 }
 
-a { color: var(--ink); }
-a:hover { opacity: 0.65; }
+a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--rule);
+  transition: text-decoration-color 0.2s ease;
+}
+a:hover { text-decoration-color: var(--accent); }
 
 .back {
+  font-family: var(--display);
+  font-style: italic;
   color: var(--meta);
   text-decoration: none;
-  font-size: 12px;
-  letter-spacing: 0.15em;
-  font-style: italic;
+  font-size: 14px;
+  letter-spacing: 0.05em;
   display: inline-block;
-  margin-bottom: 3rem;
+  margin-bottom: 4.5rem;
 }
-
-.meta {
-  color: var(--meta);
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  margin: 0 0 0.5rem;
-  font-style: italic;
-}
+.back:hover { color: var(--accent); }
 
 /* ── Letter page ──────────────────────────────────────────────────────── */
 
-.letter-page h1 {
-  font-family: var(--hand);
-  font-weight: 400;
-  font-size: 3.4rem;
-  margin: 0 0 0.5rem;
-  line-height: 1.15;
-  color: var(--ink);
-  letter-spacing: 0.05em;
-}
-
-.letter-page h1::after {
-  content: '·';
-  display: block;
+.letter-header {
   text-align: center;
-  color: var(--accent);
-  font-size: 1.2rem;
-  margin: 1rem 0 2.5rem;
-  letter-spacing: 0.5em;
+  margin-bottom: 3.5rem;
 }
 
-/* 首段「亲爱的 5 岁的我，」用手写体 */
-.letter-page article p:nth-of-type(1) {
-  font-family: var(--hand);
-  font-size: 1.8rem;
-  color: var(--ink-soft);
-  margin: 0 0 2rem;
-  padding-left: 1.5em;
-  line-height: 1.5;
+.letter-page .number {
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 0.95rem;
+  color: var(--meta);
+  letter-spacing: 0.25em;
+  text-transform: lowercase;
+  margin: 0 0 1.8rem;
 }
 
-.letter-page article p { margin: 1.4rem 0; }
-
-/* signature 行：末段（含 "—— 即将死去的我，W01"） */
-.letter-page article p:last-of-type {
-  font-family: var(--hand);
-  font-size: 1.8rem;
-  text-align: right;
-  margin-top: 4rem;
-  padding-right: 0.5em;
+.letter-page h1 {
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 2.8rem;
+  letter-spacing: 0;
   color: var(--ink);
-  line-height: 1.4;
+  margin: 0 0 1.5rem;
+  line-height: 1.18;
+}
+
+.letter-page .hairline {
+  display: block;
+  width: 3.5em;
+  height: 0;
+  margin: 0 auto 1.5rem;
+  border: 0;
+  border-top: 1px solid var(--ink);
+}
+
+.letter-page .meta-line {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--meta);
+  letter-spacing: 0.1em;
+  margin: 0;
+  text-transform: lowercase;
+}
+
+.letter-page article p {
+  margin: 1.3rem 0;
+  text-align: left;
+}
+
+/* opening line ("亲爱的 5 岁的我，") — emphasis */
+.letter-page article p:nth-of-type(1) {
+  font-weight: 500;
+  margin-top: 0;
+  letter-spacing: 0.02em;
+}
+
+/* signature 末段 — italic, right-aligned, smaller */
+.letter-page article p:last-of-type {
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 400;
+  text-align: right;
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+  margin: 3rem 0 0;
+  letter-spacing: 0.02em;
 }
 
 article blockquote {
-  margin: 1.5rem 0;
-  padding-left: 1.5rem;
-  border-left: 2px solid var(--rule);
-  color: var(--ink-soft);
+  margin: 1.5rem 1.5rem;
   font-style: italic;
+  color: var(--ink-soft);
+  font-family: var(--display);
+  font-size: 1.05rem;
 }
 
 article hr {
   border: none;
+  width: 3em;
+  height: 0;
+  margin: 2.5rem auto;
   border-top: 1px solid var(--rule);
-  margin: 2.5rem 0;
 }
 
 .signature-meta {
-  margin-top: 4rem;
-  padding-top: 1.5rem;
-  border-top: 1px dashed var(--rule);
-  font-size: 12px;
-  color: var(--meta);
+  margin-top: 5rem;
+  padding-top: 1.8rem;
+  border-top: 1px solid var(--rule);
+  font-family: var(--display);
   font-style: italic;
-  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--meta);
+  text-align: center;
+  letter-spacing: 0.02em;
 }
 
-.signature-meta p { margin: 0.3rem 0; }
+.signature-meta p { margin: 0.5rem 0; }
 
 .signature-meta .label {
-  display: inline-block;
-  min-width: 3em;
-  margin-right: 0.6em;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  font-size: 10px;
-  vertical-align: 0.1em;
   font-style: normal;
-  font-family: var(--serif);
+  font-variant: small-caps;
+  letter-spacing: 0.2em;
+  margin-right: 0.6em;
+  font-size: 10px;
+  color: var(--ink-soft);
 }
 
 /* ── Index page ────────────────────────────────────────────────────────── */
 
+.index-page header {
+  text-align: center;
+  margin-bottom: 5rem;
+}
+
 .index-page h1 {
-  font-family: var(--hand);
-  font-weight: 400;
-  font-size: 3.4rem;
-  margin: 0 0 0.5rem;
-  line-height: 1.2;
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 4rem;
+  letter-spacing: 0;
   color: var(--ink);
-  letter-spacing: 0.05em;
+  margin: 0 0 0.8rem;
+  line-height: 1.1;
 }
 
 .tagline {
+  font-family: var(--body);
   color: var(--ink-soft);
-  margin: 0.5rem 0 0.3rem;
+  font-size: 14px;
   font-style: italic;
-  font-size: 15px;
+  margin: 0 auto 1.2rem;
+  max-width: 28em;
+  line-height: 1.5;
 }
 
 .start {
-  color: var(--meta);
-  font-size: 12px;
-  margin: 0 0 3rem;
-  letter-spacing: 0.15em;
+  font-family: var(--display);
   font-style: italic;
+  font-weight: 500;
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.35em;
+  margin: 0;
   text-transform: uppercase;
 }
 
 .quarter {
-  margin: 0 0 2.5rem;
+  margin: 0 0 3.5rem;
 }
 
 .quarter h2 {
-  font-family: var(--hand);
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 500;
   font-size: 1.6rem;
-  font-weight: 400;
-  margin: 0 0 1rem;
   color: var(--ink);
-  letter-spacing: 0.03em;
+  margin: 0 0 0.3rem;
+  letter-spacing: 0.01em;
+}
+
+.quarter-sub {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--meta);
+  letter-spacing: 0.05em;
+  margin: 0 0 1.4rem;
+  text-transform: lowercase;
 }
 
 .quarter ul {
@@ -402,46 +473,76 @@ article hr {
 }
 
 .quarter li {
-  margin: 0.5rem 0;
+  margin: 0.65rem 0;
   font-size: 16px;
 }
 
 .quarter li a {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
   text-decoration: none;
   color: var(--ink);
 }
 
-.quarter li a:hover {
-  color: var(--accent);
+.quarter li .num {
+  font-family: var(--display);
+  font-style: italic;
+  color: var(--meta);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  flex-shrink: 0;
+  width: 4em;
+  text-transform: lowercase;
 }
 
-.quarter .w {
-  color: var(--meta);
-  font-size: 12px;
-  display: inline-block;
-  min-width: 3.2em;
-  letter-spacing: 0.1em;
-  font-style: italic;
+.quarter li .title {
+  color: var(--ink);
+  flex-shrink: 0;
 }
+
+.quarter li .leader {
+  flex: 1;
+  min-width: 1em;
+  border-bottom: 1px dotted var(--rule);
+  transform: translateY(-0.25em);
+  margin: 0 0.4em;
+}
+
+.quarter li .date {
+  font-family: var(--display);
+  font-style: italic;
+  color: var(--meta);
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.quarter li a:hover .title { color: var(--accent); }
+.quarter li a:hover .leader { border-bottom-color: var(--accent); }
 
 .quarter.empty .empty-note {
-  color: var(--meta);
+  font-family: var(--display);
   font-style: italic;
+  color: var(--meta);
   font-size: 14px;
+  letter-spacing: 0.05em;
   margin: 0;
 }
 
 .site-footer {
-  margin-top: 5rem;
+  margin-top: 6rem;
   padding-top: 2rem;
-  border-top: 1px dashed var(--rule);
+  border-top: 1px solid var(--rule);
+  font-family: var(--display);
+  font-style: italic;
   font-size: 12px;
   color: var(--meta);
   text-align: center;
-  font-style: italic;
+  letter-spacing: 0.05em;
 }
 
 .site-footer a { color: var(--meta); }
+.site-footer a:hover { color: var(--accent); }
 `
 
 // ── Main ──────────────────────────────────────────────────────────────────

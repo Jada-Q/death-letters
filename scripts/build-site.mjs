@@ -153,7 +153,7 @@ function pageWrap({ title, bodyClass, stylesheet, inner }) {
 <title>${escapeHtml(title)}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Spectral:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Spectral:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="${stylesheet}">
 </head>
 <body class="${bodyClass}">
@@ -281,7 +281,7 @@ a:hover { text-decoration-color: var(--accent); }
 
 .back {
   font-family: var(--display);
-  font-style: italic;
+  font-style: normal;
   color: var(--meta);
   text-decoration: none;
   font-size: 14px;
@@ -300,7 +300,7 @@ a:hover { text-decoration-color: var(--accent); }
 
 .letter-page .number {
   font-family: var(--display);
-  font-style: italic;
+  font-style: normal;
   font-weight: 400;
   font-size: 0.95rem;
   color: var(--meta);
@@ -311,7 +311,7 @@ a:hover { text-decoration-color: var(--accent); }
 
 .letter-page h1 {
   font-family: var(--display);
-  font-style: italic;
+  font-style: normal;
   font-weight: 500;
   font-size: 2.8rem;
   letter-spacing: 0;
@@ -331,7 +331,7 @@ a:hover { text-decoration-color: var(--accent); }
 
 .letter-page .meta-line {
   font-family: var(--display);
-  font-style: italic;
+  font-style: normal;
   font-size: 0.85rem;
   color: var(--meta);
   letter-spacing: 0.1em;
@@ -354,7 +354,7 @@ a:hover { text-decoration-color: var(--accent); }
 /* signature 末段 — italic, right-aligned, smaller */
 .letter-page article p:last-of-type {
   font-family: var(--display);
-  font-style: italic;
+  font-style: normal;
   font-weight: 400;
   text-align: right;
   font-size: 1.05rem;
@@ -365,7 +365,7 @@ a:hover { text-decoration-color: var(--accent); }
 
 article blockquote {
   margin: 1.5rem 1.5rem;
-  font-style: italic;
+  font-style: normal;
   color: var(--ink-soft);
   font-family: var(--display);
   font-size: 1.05rem;
@@ -384,7 +384,7 @@ article hr {
   padding-top: 1.8rem;
   border-top: 1px solid var(--rule);
   font-family: var(--display);
-  font-style: italic;
+  font-style: normal;
   font-weight: 400;
   font-size: 13px;
   color: var(--meta);
@@ -412,7 +412,7 @@ article hr {
 
 .index-page h1 {
   font-family: var(--display);
-  font-style: italic;
+  font-style: normal;
   font-weight: 500;
   font-size: 4rem;
   letter-spacing: 0;
@@ -425,7 +425,7 @@ article hr {
   font-family: var(--body);
   color: var(--ink-soft);
   font-size: 14px;
-  font-style: italic;
+  font-style: normal;
   margin: 0 auto 1.2rem;
   max-width: 28em;
   line-height: 1.5;
@@ -433,7 +433,7 @@ article hr {
 
 .start {
   font-family: var(--display);
-  font-style: italic;
+  font-style: normal;
   font-weight: 500;
   font-size: 11px;
   color: var(--accent);
@@ -448,7 +448,7 @@ article hr {
 
 .quarter h2 {
   font-family: var(--display);
-  font-style: italic;
+  font-style: normal;
   font-weight: 500;
   font-size: 1.6rem;
   color: var(--ink);
@@ -458,7 +458,7 @@ article hr {
 
 .quarter-sub {
   font-family: var(--display);
-  font-style: italic;
+  font-style: normal;
   font-size: 13px;
   color: var(--meta);
   letter-spacing: 0.05em;
@@ -487,7 +487,7 @@ article hr {
 
 .quarter li .num {
   font-family: var(--display);
-  font-style: italic;
+  font-style: normal;
   color: var(--meta);
   font-size: 13px;
   letter-spacing: 0.1em;
@@ -511,7 +511,7 @@ article hr {
 
 .quarter li .date {
   font-family: var(--display);
-  font-style: italic;
+  font-style: normal;
   color: var(--meta);
   font-size: 13px;
   flex-shrink: 0;
@@ -522,7 +522,7 @@ article hr {
 
 .quarter.empty .empty-note {
   font-family: var(--display);
-  font-style: italic;
+  font-style: normal;
   color: var(--meta);
   font-size: 14px;
   letter-spacing: 0.05em;
@@ -534,7 +534,7 @@ article hr {
   padding-top: 2rem;
   border-top: 1px solid var(--rule);
   font-family: var(--display);
-  font-style: italic;
+  font-style: normal;
   font-size: 12px;
   color: var(--meta);
   text-align: center;

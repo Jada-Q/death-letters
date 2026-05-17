@@ -1,0 +1,163 @@
+:root {
+  --serif: 'Source Han Serif SC', 'Songti SC', 'Noto Serif CJK SC', 'Crimson Text', Georgia, serif;
+  --bg: #fafaf7;
+  --fg: #1a1a1a;
+  --meta: #888;
+  --rule: #ddd;
+  --link: #1a1a1a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: var(--serif);
+  background: var(--bg);
+  color: var(--fg);
+  max-width: 36em;
+  margin: 0 auto;
+  padding: 4rem 1.5rem 6rem;
+  font-size: 17px;
+  line-height: 1.75;
+}
+
+a { color: var(--link); }
+a:hover { opacity: 0.6; }
+
+.meta {
+  color: var(--meta);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0 0 1.5rem;
+}
+
+.back {
+  color: var(--meta);
+  text-decoration: none;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  display: inline-block;
+  margin-bottom: 3rem;
+}
+
+h1 {
+  font-weight: 500;
+  font-size: 1.8rem;
+  letter-spacing: -0.01em;
+  margin: 0 0 2rem;
+  line-height: 1.3;
+}
+
+h2 {
+  font-weight: 500;
+  font-size: 0.95rem;
+  margin: 3rem 0 1rem;
+  color: var(--meta);
+  letter-spacing: 0.05em;
+}
+
+article p { margin: 1.2rem 0; }
+
+article blockquote {
+  margin: 1.5rem 0;
+  padding-left: 1.5rem;
+  border-left: 2px solid var(--rule);
+  color: var(--meta);
+  font-style: italic;
+}
+
+article hr {
+  border: none;
+  border-top: 1px solid var(--rule);
+  margin: 2.5rem 0;
+}
+
+.signature-meta {
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+  font-size: 12px;
+  color: var(--meta);
+}
+
+.signature-meta p {
+  margin: 0.3rem 0;
+}
+
+.signature-meta .label {
+  display: inline-block;
+  min-width: 3em;
+  margin-right: 0.6em;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 10px;
+  vertical-align: 0.1em;
+}
+
+/* index */
+
+.tagline {
+  color: var(--meta);
+  margin: 0.5rem 0 0.3rem;
+  font-style: italic;
+}
+
+.start {
+  color: var(--meta);
+  font-size: 13px;
+  margin: 0 0 3rem;
+  letter-spacing: 0.05em;
+}
+
+.quarter {
+  margin: 0 0 2.5rem;
+}
+
+.quarter h2 {
+  font-size: 1rem;
+  margin: 0 0 0.8rem;
+  color: var(--fg);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.quarter ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.quarter li {
+  margin: 0.4rem 0;
+  font-size: 16px;
+}
+
+.quarter li a {
+  text-decoration: none;
+}
+
+.quarter .w {
+  color: var(--meta);
+  font-size: 13px;
+  display: inline-block;
+  min-width: 3.2em;
+  letter-spacing: 0.05em;
+}
+
+.quarter.empty .empty-note {
+  color: var(--meta);
+  font-style: italic;
+  font-size: 14px;
+  margin: 0;
+}
+
+.site-footer {
+  margin-top: 5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--rule);
+  font-size: 12px;
+  color: var(--meta);
+  text-align: center;
+}
+
+.site-footer a { color: var(--meta); }

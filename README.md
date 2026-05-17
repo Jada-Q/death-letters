@@ -28,4 +28,6 @@ pnpm publish -- <slug>      # 复制 markdown 到剪贴板
 pnpm translate -- --quarter q1 --lang ja  # 季末触发
 ```
 
-详见 [`docs/2026-05-17-design.md`](./docs/2026-05-17-design.md) 和 [`docs/2026-05-17-implementation-plan.md`](./docs/2026-05-17-implementation-plan.md)。
+详见 [`spec/2026-05-17-design.md`](./spec/2026-05-17-design.md) 和 [`spec/2026-05-17-implementation-plan.md`](./spec/2026-05-17-implementation-plan.md)。
+
+公开站点：https://jada-q.github.io/death-letters/（GitHub Pages 自动从 main 分支 `docs/` 部署）
